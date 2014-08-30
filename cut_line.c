@@ -68,8 +68,11 @@ void * try_core(void * d){
             int dirty = 0;
             int max_i = height*width;
             for(int i=0; i<max_i; ++i)
-                if( bitmap[i] && getWeightByDis(dismap[i], offset, sep) )
+                if( bitmap[i] && getWeightByDis(dismap[i], offset, sep) ){
                     ++dirty;
+                    if( dirty >= best_error )
+                        break;
+                }
             int error = dirty;
             printf("INFO: step %d. angle=%.2f, offset=%.2f, sep=%.2f, error=%d\n", step, arg/M_PI*180, offset, sep, error);
             if( error < best_error ){
