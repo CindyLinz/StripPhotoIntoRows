@@ -21,7 +21,7 @@ Cut image into rows.
 - execute
 
   ```
-  ./cut\_line input.jpg
+  ./cut_line input.jpg
   ```
 
 - Then you got cut\_line\_output.jpg and many cut\_strip\_???.jpg as a result
