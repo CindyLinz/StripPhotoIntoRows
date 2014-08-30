@@ -18,6 +18,7 @@
 struct try_data_t {
     int i, error, width, height;
     double arg, offset, sep;
+    double * pre_dismap;
     char * bitmap;
 };
 
@@ -50,6 +51,7 @@ void * try_core(void * d){
     double max_sep = diag / GUESSED_MIN_ROWS;
     int best_error = height * width;
     double best_arg, best_offset, best_sep;
+    double * pre_dismap = data->pre_dismap;
     double * dismap;
     {
         int i = 0;
@@ -63,11 +65,17 @@ void * try_core(void * d){
     for(int step=0; step<(GUESS_ARG_TIMES+USE_THREAD-1)/USE_THREAD; ++step){
         double arg = (double) rand()/RAND_MAX * (GUESS_MAX_ARG*2) - GUESS_MAX_ARG;
 
-        int i = 0, j = 0;
+        double cos_arg = cos(arg);
+        double sin_arg = sin(arg);
+        int i = 0, j = 0, j2 = 0;
         for(int y=0; y<height; ++y)
             for(int x=0; x<width; ++x)
-                if( bitmap[i++] )
-                    dismap[j++] = getDis(x, y, arg);
+                if( bitmap[i++] ){
+                    dismap[j++] =
+                        pre_dismap[j2] * cos_arg -
+                        pre_dismap[j2+1] * sin_arg;
+                    j2 += 2;
+                }
         for(int step2=0; step2<GUESS_OFFSET_SEP_TIMES; ++step2){
             double sep = (double) rand() / RAND_MAX * (max_sep-min_sep) + min_sep;
             double offset = (double) rand() / RAND_MAX * sep;
@@ -134,6 +142,24 @@ int main(int argc, char*argv[]){
                 ++i;
             }
     }
+    double * pre_dismap;
+    {
+        int i = 0, j = 0, size = 0;
+        for(int y=0; y<height; ++y)
+            for(int x=0; x<width; ++x)
+                if( bitmap[i++] )
+                    ++size;
+        pre_dismap = (double*) malloc(size * 2 * sizeof(double));
+        i = 0;
+        for(int y=0; y<height; ++y)
+            for(int x=0; x<width; ++x)
+                if( bitmap[i++] ){
+                    double r = sqrt(x*x + y*y);
+                    double phi = atan2(y, x);
+                    pre_dismap[j++] = r * sin(phi);
+                    pre_dismap[j++] = r * cos(phi);
+                }
+    }
 
     pthread_t thread[USE_THREAD];
     struct try_data_t try_data[USE_THREAD];
@@ -141,6 +167,7 @@ int main(int argc, char*argv[]){
         try_data[thread_i].width = width;
         try_data[thread_i].height = height;
         try_data[thread_i].bitmap = bitmap;
+        try_data[thread_i].pre_dismap = pre_dismap;
         pthread_create(&thread[thread_i], NULL, try_core, &try_data[thread_i]);
     }
     int best_error = height * width;
@@ -223,6 +250,8 @@ int main(int argc, char*argv[]){
         fclose(out_f);
     }
 
+    free(bitmap);
+    free(pre_dismap);
     gdImageDestroy(strip_img);
     gdImageDestroy(out_img);
     gdImageDestroy(in_img);
