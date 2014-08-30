@@ -79,16 +79,15 @@ void * try_core(void * d){
                     if( dirty >= best_error )
                         break;
                 }
-            int error = dirty;
-            printf("INFO: step %d. angle=%.2f, offset=%.2f, sep=%.2f, error=%d\n", step, arg/M_PI*180, offset, sep, error);
-            if( error < best_error ){
-                best_error = error;
+            if( dirty < best_error ){
+                best_error = dirty;
                 best_arg = arg;
                 best_offset = offset;
                 best_sep = sep;
-                printf("INFO: better_angle=%.2f, better_offset=%.2f, better_sep=%.2f, error=%d\n", arg/M_PI*180, offset, sep, error);
+                //printf("INFO: better_angle=%.2f, better_offset=%.2f, better_sep=%.2f, error=%d\n", arg/M_PI*180, offset, sep, error);
             }
         }
+        printf("INFO: step %d. angle=%.2f, offset=%.2f, sep=%.2f, error=%d\n", step, best_arg/M_PI*180, best_offset, best_sep, best_error);
     }
     free(dismap);
     data->error = best_error;
