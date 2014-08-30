@@ -50,25 +50,31 @@ void * try_core(void * d){
     double max_sep = diag / GUESSED_MIN_ROWS;
     int best_error = height * width;
     double best_arg, best_offset, best_sep;
-    double * dismap = (double*) malloc(width*height*sizeof(double));
+    double * dismap;
+    {
+        int i = 0;
+        int size = 0;
+        for(int y=0; y<height; ++y)
+            for(int x=0; x<width; ++x)
+                if( bitmap[i++] )
+                    ++size;
+        dismap = (double*) malloc(size*sizeof(double));
+    }
     for(int step=0; step<(GUESS_ARG_TIMES+USE_THREAD-1)/USE_THREAD; ++step){
         double arg = (double) rand()/RAND_MAX * (GUESS_MAX_ARG*2) - GUESS_MAX_ARG;
 
-        int i = 0;
+        int i = 0, j = 0;
         for(int y=0; y<height; ++y)
-            for(int x=0; x<width; ++x){
-                if( bitmap[i] )
-                    dismap[i] = getDis(x, y, arg);
-                ++i;
-            }
+            for(int x=0; x<width; ++x)
+                if( bitmap[i++] )
+                    dismap[j++] = getDis(x, y, arg);
         for(int step2=0; step2<GUESS_OFFSET_SEP_TIMES; ++step2){
             double sep = (double) rand() / RAND_MAX * (max_sep-min_sep) + min_sep;
             double offset = (double) rand() / RAND_MAX * sep;
 
             int dirty = 0;
-            int max_i = height*width;
-            for(int i=0; i<max_i; ++i)
-                if( bitmap[i] && getWeightByDis(dismap[i], offset, sep) ){
+            for(int k=0; k<j; ++k)
+                if( getWeightByDis(dismap[k], offset, sep) ){
                     ++dirty;
                     if( dirty >= best_error )
                         break;
