@@ -55,8 +55,11 @@ void * try_core(void * d){
 
         int i = 0;
         for(int y=0; y<height; ++y)
-            for(int x=0; x<width; ++x)
-                dismap[i++] = getDis(x, y, arg);
+            for(int x=0; x<width; ++x){
+                if( bitmap[i] )
+                    dismap[i] = getDis(x, y, arg);
+                ++i;
+            }
         for(int step2=0; step2<GUESS_OFFSET_SEP_TIMES; ++step2){
             double sep = (double) rand() / RAND_MAX * (max_sep-min_sep) + min_sep;
             double offset = (double) rand() / RAND_MAX * sep;
