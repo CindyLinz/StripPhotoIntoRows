@@ -82,18 +82,15 @@ void * try_core(void * d){
 
             int dirty = 0;
             for(int k=0; k<j; ++k)
-                if( getWeightByDis(dismap[k], offset, sep) ){
-                    ++dirty;
-                    if( dirty >= best_error )
-                        break;
-                }
-            if( dirty < best_error ){
-                best_error = dirty;
-                best_arg = arg;
-                best_offset = offset;
-                best_sep = sep;
-                //printf("INFO: better_angle=%.2f, better_offset=%.2f, better_sep=%.2f, error=%d\n", arg/M_PI*180, offset, sep, error);
-            }
+                if( getWeightByDis(dismap[k], offset, sep) )
+                    if( ++dirty >= best_error )
+                        goto SKIP;
+            best_error = dirty;
+            best_arg = arg;
+            best_offset = offset;
+            best_sep = sep;
+            //printf("INFO: better_angle=%.2f, better_offset=%.2f, better_sep=%.2f, error=%d\n", arg/M_PI*180, offset, sep, error);
+            SKIP:;
         }
         printf("INFO: step %d. angle=%.2f, offset=%.2f, sep=%.2f, error=%d\n", step, best_arg/M_PI*180, best_offset, best_sep, best_error);
     }
