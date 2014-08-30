@@ -13,6 +13,7 @@
 #define GUESSED_MAX_ROWS (200)
 #define GUESSED_MIN_ROWS (50)
 #define USE_THREAD (4)
+#define THRESHOLD(color) ((color & 0xFF) < 128)
 
 struct try_data_t {
     int i, error, width, height;
@@ -118,7 +119,7 @@ int main(int argc, char*argv[]){
         int i = 0;
         for(int y=0; y<height; ++y)
             for(int x=0; x<width; ++x){
-                if( (0xFF & gdImageGetPixel(in_img, x, y)) < 128 )
+                if( THRESHOLD(gdImageGetPixel(in_img, x, y)) )
                     bitmap[i] = 1;
                 else
                     bitmap[i] = 0;

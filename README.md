@@ -11,6 +11,7 @@ Cut image into rows.
   + #define GUESSED\_MAX\_ROWS (200)
   + #define GUESSED\_MIN\_ROWS (50)
   + #define USE\_THREAD (4)
+  + #define THRESHOLD(color) ((color & 0xFF) < 128)
 
 - execute
 
