@@ -25,7 +25,7 @@ Cut image into rows.
   ./cut_line input.jpg
   ```
 
-- Then you got cut\_line\_output.jpg and many cut\_strip\_???.jpg as a result
+- Then you got input\_output.jpg and many input\_???.jpg as a result
 
 # Sample
 
