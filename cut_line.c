@@ -39,6 +39,20 @@ inline int getWeight(int x, int y, double arg, double offset, double sep){
     return getWeightByDis(getDis(x, y, arg), offset, sep);
 }
 
+void strip_ext(char *fname)
+{
+    char *end = fname + strlen(fname);
+
+    while (end > fname && *end != '.' && *end != '\\' && *end != '/') {
+        --end;
+    }
+    if ((end > fname && *end == '.') &&
+        (*(end - 1) != '\\' && *(end - 1) != '/')) {
+        *end = '\0';
+    }  
+}
+// https://stackoverflow.com/questions/43163677/how-do-i-strip-a-file-extension-from-a-string-in-c/43163740
+
 void * try_core(void * d){
     struct try_data_t * data = (struct try_data_t *) d;
     srand(time(0)+data->i);
@@ -113,6 +127,9 @@ int main(int argc, char*argv[]){
         printf("ERROR: open file %s failed: %s\n", argv[1], strerror(errno));
         return 1;
     }
+    char filename[strlen(argv[1]) + 1];
+    strcpy(filename, argv[1]);
+    strip_ext(filename);
 
     gdImagePtr in_img;
     in_img = gdImageCreateFromJpeg(in_f);
@@ -217,7 +234,7 @@ int main(int argc, char*argv[]){
         gdImageCopy(strip_img, out_img, 0, dst_y, 0, src_y, (int)(max_x-min_x+1), h);
         char strip_filename[1024];
         ++strip_i;
-        snprintf(strip_filename, 1024, "cut_strip_%03d.jpg", strip_i);
+        snprintf(strip_filename, 1024, "%s_%03d.jpg", filename, strip_i);
         FILE *strip_f = fopen(strip_filename, "wb");
         gdImageJpeg(strip_img, strip_f, 95);
         fclose(strip_f);
@@ -242,7 +259,9 @@ int main(int argc, char*argv[]){
                 ++i;
             }
         gdImageCopyRotated(out_img, in_img, (max_x-min_x+1)/2, (max_y-min_y+1)/2, 0, 0, width, height, rotate_angle);
-        FILE *out_f = fopen("cut_line_output.jpg", "wb");
+        char output_filename[1024];
+        snprintf(output_filename, 1024, "%s_output.jpg", filename);
+        FILE *out_f = fopen(output_filename, "wb");
         gdImageJpeg(out_img, out_f, 95);
         fclose(out_f);
     }
